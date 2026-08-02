@@ -17,7 +17,9 @@ class Size extends Model
 
     public function perfumeItems(): BelongsToMany
     {
-        return $this->belongsToMany(PerfumeItem::class, 'perfume_item_sizes');
+        return $this->belongsToMany(PerfumeItem::class, 'perfume_item_sizes')
+                    ->withPivot('price')
+                    ->withTimestamps();
     }
 
     public function cartItems(): HasMany
