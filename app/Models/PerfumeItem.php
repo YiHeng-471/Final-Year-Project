@@ -13,17 +13,16 @@ class PerfumeItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'perfume_category_id',
+        'category_id',
         'name',
         'description',
         'image_url',
-        'price',
         'availability_status'
     ];
 
     public function perfumeCategory(): BelongsTo
     {
-        return $this->belongsTo(PerfumeCategory::class);
+        return $this->belongsTo(PerfumeCategory::class, 'category_id');
     }
 
     public function sizes(): BelongsToMany
