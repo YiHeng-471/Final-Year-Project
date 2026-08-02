@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Size extends Model
 {
@@ -14,9 +15,9 @@ class Size extends Model
         'name'
     ];
 
-    public function perfumeItems(): HasMany
+    public function perfumeItems(): BelongsToMany
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->belongsToMany(PerfumeItem::class, 'perfume_item_sizes');
     }
 
     public function cartItems(): HasMany

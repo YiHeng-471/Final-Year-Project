@@ -21,11 +21,6 @@ class PerfumeItem extends Model
         'availability_status'
     ];
 
-    public function perfumeItemSize(): HasMany
-    {
-        return $this->HasMany(PerfumeItemSize::class);
-    }
-
     public function perfumeCategory(): BelongsTo
     {
         return $this->belongsTo(PerfumeCategory::class);

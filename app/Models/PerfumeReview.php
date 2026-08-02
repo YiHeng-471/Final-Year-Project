@@ -11,7 +11,9 @@ class PerfumeReview extends Model
     use HasFactory;
 
     protected $fillable = [
-        'content'
+        'content',
+        'user_id',
+        'perfume_item_id'
     ];
 
     public function user(): BelongsTo

@@ -13,7 +13,7 @@ class CartItem extends Model
     protected $fillable = [
         'cart_id',
         'size_id',
-        'menu_item_id',
+        'perfume_item_id',
         'quantity'
     ];
 
@@ -22,7 +22,7 @@ class CartItem extends Model
         return $this->belongsTo(Cart::class);
     }
 
-    public function menuItem(): BelongsTo
+    public function perfumeItem(): BelongsTo
     {
         return $this->belongsTo(PerfumeItem::class);
     }
