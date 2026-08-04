@@ -11,16 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('perfume_items', function (Blueprint $table) {
+        Schema::create('states', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')
-                ->constrained('perfume_categories');
             $table->string('name');
-            $table->string('description');
-            $table->text('scent-notes')->nullable();
-            $table->text('tags')->nullable();
-            $table->string('image_url');
-            $table->enum('availability_status', [0, 1]);
             $table->timestamps();
         });
     }
@@ -30,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('perfume_items');
+        Schema::dropIfExists('states');
     }
 };

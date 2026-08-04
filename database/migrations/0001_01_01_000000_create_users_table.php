@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('pref_scent_type')->nullable();
+            $table->string('pref_occasion')->nullable();
+            $table->string('pref_gender')->nullable();
+            $table->boolean('has_completed_questionnaire')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
