@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { Sparkles, ShoppingCart, User, LogOut, BookOpen } from 'lucide-react';
 
 export default function Navigation({ children }) {
@@ -8,8 +8,8 @@ export default function Navigation({ children }) {
     const cartItemCount = (cart || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
 
     const handleLogout = () => {
-      // call backend logout if available
-      Inertia.post('/logout');
+      setUser(null);
+      router.visit('/login');
     };
 
     return (

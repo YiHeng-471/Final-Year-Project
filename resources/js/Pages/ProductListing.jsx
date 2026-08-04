@@ -111,17 +111,31 @@ const mockProducts = [
 ];
 
 export default function ProductListing() {
-  const { auth } = usePage().props || {};
+  const { auth, perfumeItems = null } = usePage().props || {};
   const user = auth?.user;
+  const serverProducts = perfumeItems ? perfumeItems.map(p => ({
+    id: p.id,
+    name: p.name,
+    brand: p.perfume_category?.name || '',
+    price: p.sizes && p.sizes.length ? p.sizes[0].pivot.price : p.price || 0,
+    image: p.image_url || '✨',
+    rating: 4.5,
+    reviews: 100,
+    scentType: p.scent_notes ? p.scent_notes.split(',') : [],
+    occasion: [],
+    gender: p.tags ? p.tags.split(',')[0] : 'unisex',
+  })) : null;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedScentFilter, setSelectedScentFilter] = useState([]);
   const [selectedGenderFilter, setSelectedGenderFilter] = useState('');
   const [sortBy, setSortBy] = useState('recommended');
 
-  const recommendedProducts = useMemo(() => {
-    if (!user?.preferences) return mockProducts;
+  const sourceProducts = serverProducts || mockProducts;
 
-    return mockProducts.map(product => {
+  const recommendedProducts = useMemo(() => {
+    if (!user?.preferences) return sourceProducts;
+
+    return sourceProducts.map(product => {
       let score = 0;
 
       const scentMatch = product.scentType.some(scent =>

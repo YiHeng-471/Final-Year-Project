@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia';
 import Navigation from './Navigation';
 import { Star, Heart, ShoppingCart, Info, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,25 +30,30 @@ const productData = {
 };
 
 export default function ProductDetail() {
+  const { product } = {};
+  const { product: serverProduct } = (typeof window !== 'undefined' && window.page && window.page.props) ? window.page.props : {};
   const id = null; // Inertia will supply props if necessary; default to demo id
   const [selectedSize, setSelectedSize] = useState('50ml');
   const [quantity, setQuantity] = useState(1);
-  const addToCart = (item) => {
-    // placeholder: in a full app this would call a cart action
-    console.log('addToCart', item);
+  const addToCart = (payload) => {
+    Inertia.post('/cart', payload, {
+      onSuccess: () => {
+        toast.success('Added to cart!');
+      },
+    });
   };
 
-  const product = productData[id || '1'] || productData['1'];
+  const product = serverProduct || productData[id || '1'] || productData['1'];
 
   const handleAddToCart = () => {
+    // If product comes from server it should include sizes with pivot prices
+    const sizeObj = product.sizes?.find((s) => s.name === selectedSize) || {};
+
     addToCart({
-      id: `${product.id}-${selectedSize}`,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      size: selectedSize,
+      perfume_item_id: product.id,
+      size_id: sizeObj.id || null,
+      quantity,
     });
-    toast.success('Added to cart!');
   };
 
   return (

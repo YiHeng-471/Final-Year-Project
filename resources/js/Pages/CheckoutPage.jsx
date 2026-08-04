@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia';
 import Navigation from './Navigation';
 import { CreditCard, MapPin, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,11 +35,17 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    toast.success('Order placed successfully!');
-    clearCart();
-    setTimeout(() => {
-      Inertia.visit('/profile');
-    }, 2000);
+
+    // Submit checkout to server
+    Inertia.post('/checkout', {
+      payment_method: 'card',
+      address_id: null,
+    }, {
+      onSuccess: () => {
+        toast.success('Order placed successfully!');
+        Inertia.visit('/checkout/success');
+      }
+    });
   };
 
   if (!cart || cart.length === 0) {
@@ -335,7 +342,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span>{shipping === 0 ? 'FREE' : `RM ${shipping.toFixed(2)}`}</span>
-                </div>test
+                </div>
                 <div className="flex justify-between text-lg pt-3 border-t border-gray-200">
                   <span>Total</span>
                   <span>RM {total.toFixed(2)}</span>

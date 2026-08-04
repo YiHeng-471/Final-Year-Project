@@ -6,27 +6,7 @@ export default function ProfilePage() {
   const { auth } = usePage().props || {};
   const user = auth?.user;
 
-  const mockOrders = [
-    {
-      id: 'ORD-001',
-      date: '2026-04-15',
-      status: 'Delivered',
-      total: 578,
-      items: [
-        { name: 'Midnight Rose', image: '🌹', price: 289 },
-        { name: 'Ocean Breeze', image: '🌊', price: 195 },
-      ],
-    },
-    {
-      id: 'ORD-002',
-      date: '2026-03-28',
-      status: 'Delivered',
-      total: 445,
-      items: [
-        { name: 'Sandalwood Elite', image: '🌲', price: 445 },
-      ],
-    },
-  ];
+  const { orders = [] } = usePage().props || {};
 
   const preferences = user?.preferences;
 
@@ -127,7 +107,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl">Order History</h2>
               </div>
 
-              {mockOrders.length === 0 ? (
+              {orders.length === 0 ? (
                 <div className="text-center py-12">
                   <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 mb-4">No orders yet</p>

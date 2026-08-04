@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useApp } from '../AppContext';
 import Navigation from './Navigation';
 import { Sparkles, Heart, Search, TrendingUp } from 'lucide-react';
