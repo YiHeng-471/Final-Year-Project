@@ -17,7 +17,9 @@ class PerfumeItem extends Model
         'name',
         'description',
         'image_url',
-        'availability_status'
+        'availability_status',
+        'scent-notes',
+        'tags',
     ];
 
     public function perfumeCategory(): BelongsTo

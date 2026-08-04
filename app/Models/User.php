@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'pref_scent_type',
+        'pref_occasion',
+        'pref_gender',
+        'has_completed_questionnaire',
     ];
 
     /**
