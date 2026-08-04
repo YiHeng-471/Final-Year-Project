@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -15,17 +17,24 @@ class LoginController extends Controller
 
     public function check(Request $request)
     {
-        $validatedCredentials = $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email|exists:users,email',
             'password' => 'required|min:8',
         ]);
 
-        if (Auth::attempt($validatedCredentials)) {
-            $request->session()->regenerate();
-            return redirect('/menu');
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return back()->withErrors(['email' => 'Incorrect email or password.'])->onlyInput('email');
         }
-        // does not match
-        return back()->withErrors(['invalid' => 'Incorrect email or password.']);
+
+        if (!$user->email_verified_at) {
+            return redirect()->route('verify.email', ['email' => $user->email]);
+        }
+
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate();
+
+        return redirect()->intended('/');
     }
 
     public function logout(Request $request)

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,12 +16,19 @@ export default function RegisterPage() {
       return;
     }
 
-    if (name && email && password) {
-      toast.success('Account created successfully!');
-      window.location.href = '/questionnaire';
-    } else {
-      toast.error('Please fill in all fields');
-    }
+    router.post('/register', {
+      name,
+      email,
+      password,
+      password_confirmation: confirmPassword,
+    }, {
+      onSuccess: () => {
+        toast.success('Account created successfully! Check your email for the verification code.');
+      },
+      onError: (errors) => {
+        toast.error(errors?.email?.[0] || 'Registration failed.');
+      }
+    });
   };
 
   return (

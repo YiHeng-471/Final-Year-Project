@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -9,13 +9,14 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    // Mock login (UI-only)
-    if (email && password) {
-      toast.success('Welcome back!');
-      window.location.href = '/';
-    } else {
-      toast.error('Please enter email and password');
-    }
+    router.post('/login', { email, password }, {
+      onSuccess: () => {
+        toast.success('Logged in successfully!');
+      },
+      onError: (errors) => {
+        toast.error(errors?.email?.[0] || 'Login failed.');
+      }
+    });
   };
 
   return (
