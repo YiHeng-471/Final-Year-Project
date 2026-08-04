@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Inertia } from '@inertiajs/inertia';
-import { usePage } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 import { toast } from 'sonner';
 
 export default function VerifyEmail() {
@@ -9,7 +8,7 @@ export default function VerifyEmail() {
 
   const handleVerify = (e) => {
     e.preventDefault();
-    Inertia.post('/verify', { email, code }, {
+    router.post('/verify', { email, code }, {
       onSuccess: () => {
         toast.success('Email verified! Redirecting...');
       },

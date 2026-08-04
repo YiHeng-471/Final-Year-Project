@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
+import { Link, router } from '@inertiajs/react';
 import Navigation from './Navigation';
 import { Star, Heart, ShoppingCart, Info, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
@@ -36,7 +35,7 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState('50ml');
   const [quantity, setQuantity] = useState(1);
   const addToCart = (payload) => {
-    Inertia.post('/cart', payload, {
+    router.post('/cart', payload, {
       onSuccess: () => {
         toast.success('Added to cart!');
       },

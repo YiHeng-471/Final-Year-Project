@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
+import { usePage, router } from '@inertiajs/react';
 import Navigation from './Navigation';
 import { CreditCard, MapPin, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -37,7 +36,7 @@ export default function CheckoutPage() {
     e.preventDefault();
 
     // Submit checkout to server
-    Inertia.post('/checkout', {
+    router.post('/checkout', {
       payment_method: 'card',
       address_id: null,
     }, {

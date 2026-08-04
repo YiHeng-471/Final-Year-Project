@@ -1,20 +1,19 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import Navigation from './Navigation';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { Inertia } from '@inertiajs/inertia';
 import { toast } from 'sonner';
 
 export default function CartPage() {
   const { cart = [] } = usePage().props || {};
   const removeFromCart = (id) => {
-    Inertia.delete(`/cart/${id}`, {
+    router.delete(`/cart/${id}`, {
       onSuccess: () => toast.success('Removed from cart'),
     });
   };
 
   const updateQuantity = (id, newQty) => {
     if (newQty < 1) return;
-    Inertia.patch(`/cart/${id}`, { quantity: newQty }, {
+    router.patch(`/cart/${id}`, { quantity: newQty }, {
       preserveState: true,
     });
   };
