@@ -18,9 +18,10 @@ use Inertia\Inertia;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', [RecommendationController::class, 'index'])->name('home');
-Route::get('/questionnaire', fn() => Inertia::render('QuestionnairePage'))->name('questionnaire');
-Route::post('/questionnaire', [RecommendationController::class, 'submitQuiz'])->name('questionnaire.submit');
+Route::get('/', function () {
+    return Inertia::render('HomePage'); 
+});
+
 
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products');

@@ -28,12 +28,11 @@ const productData = {
   },
 };
 
-export default function ProductDetail() {
-  const { product } = {};
-  const { product: serverProduct } = (typeof window !== 'undefined' && window.page && window.page.props) ? window.page.props : {};
-  const id = null; // Inertia will supply props if necessary; default to demo id
+// Accept backend props directly into the component
+export default function ProductDetail({ product: serverProduct, id = null }) {
   const [selectedSize, setSelectedSize] = useState('50ml');
   const [quantity, setQuantity] = useState(1);
+
   const addToCart = (payload) => {
     router.post('/cart', payload, {
       onSuccess: () => {
@@ -42,6 +41,7 @@ export default function ProductDetail() {
     });
   };
 
+  // Safe fallback to mock data if backend isn't sending a product object yet
   const product = serverProduct || productData[id || '1'] || productData['1'];
 
   const handleAddToCart = () => {
@@ -207,13 +207,13 @@ export default function ProductDetail() {
               ))}
             </div>
           </div>
-
+          
           <div className="bg-white rounded-xl p-6">
             <h3 className="mb-4">Middle Notes</h3>
             <div className="space-y-2">
               {product.notes.middle.map((note) => (
                 <div key={note} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-pink-600 rounded-full" />
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
                   <span className="text-sm text-gray-700">{note}</span>
                 </div>
               ))}
@@ -225,7 +225,7 @@ export default function ProductDetail() {
             <div className="space-y-2">
               {product.notes.base.map((note) => (
                 <div key={note} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-900 rounded-full" />
+                  <div className="w-2 h-2 bg-amber-700 rounded-full" />
                   <span className="text-sm text-gray-700">{note}</span>
                 </div>
               ))}
