@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\QuestionnaireController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -93,4 +93,8 @@ Route::middleware(['auth'])->group(function () {
 
     // User Data
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+
+    // Fragrance preference questionnaire
+    Route::get('/questionnaire', [QuestionnaireController::class, 'show'])->name('questionnaire.show');
+    Route::post('/questionnaire', [QuestionnaireController::class, 'store'])->name('questionnaire.store');
 });

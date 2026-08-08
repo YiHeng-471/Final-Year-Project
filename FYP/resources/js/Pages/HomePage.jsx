@@ -29,7 +29,7 @@ export default function HomePage() {
           </p>
           {!hasPreferences ? (
             <Link
-              to="/questionnaire"
+              href="/questionnaire"
               className="inline-flex items-center gap-2 bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
             >
               <Sparkles className="w-5 h-5" />

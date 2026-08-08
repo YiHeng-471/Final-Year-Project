@@ -47,6 +47,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'has_completed_questionnaire' => 'boolean',
     ];
 
     public function orders(): HasMany
@@ -67,6 +68,11 @@ class User extends Authenticatable
     public function perfumeReviews(): HasMany
     {
         return $this->hasMany(PerfumeReview::class);
+    }
+
+    public function questionnairePreference(): HasOne
+    {
+        return $this->hasOne(QuestionnairePreference::class);
     }
 
     public function sendEmailVerificationCode(): bool

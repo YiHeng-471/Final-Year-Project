@@ -1,269 +1,295 @@
-import { useState } from 'react';
-import { useForm, Head, router } from '@inertiajs/react';
-import { useApp } from '../AppContext';
-import Navigation from './Navigation';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  CircleHelp,
+  Sparkles,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import Navigation from './Navigation';
 
-const scentTypes = [
-  { id: 'floral', name: 'Floral', description: 'Romantic, feminine, elegant', emoji: '🌸' },
-  { id: 'woody', name: 'Woody', description: 'Warm, sophisticated, earthy', emoji: '🌲' },
-  { id: 'fresh', name: 'Fresh', description: 'Clean, crisp, energizing', emoji: '🍃' },
-  { id: 'oriental', name: 'Oriental', description: 'Exotic, spicy, luxurious', emoji: '✨' },
-  { id: 'citrus', name: 'Citrus', description: 'Bright, zesty, uplifting', emoji: '🍊' },
-  { id: 'aquatic', name: 'Aquatic', description: 'Cool, marine, refreshing', emoji: '🌊' },
+const steps = [
+  { number: 1, short: 'Character', title: 'What kind of scent appeals to you?', subtitle: 'Choose up to 3 scent characters that feel most like you.' },
+  { number: 2, short: 'Notes', title: 'Which fragrance notes do you enjoy?', subtitle: 'Choose up to 5, or skip this step if you are not sure yet.' },
+  { number: 3, short: 'Occasion', title: 'When will you mainly wear it?', subtitle: 'Choose up to 3 situations so we can understand the setting.' },
+  { number: 4, short: 'Feeling', title: 'How should your fragrance feel?', subtitle: 'Choose up to 3 qualities you want the fragrance to express.' },
+  { number: 5, short: 'Budget', title: 'Set your shopping preferences', subtitle: 'Your budget filters shop products; marketed category is optional.' },
+];
+
+const scentCharacters = [
+  { id: 'floral', name: 'Floral', emoji: '🌸', description: 'Petal-soft, romantic and elegant' },
+  { id: 'woody', name: 'Woody', emoji: '🌲', description: 'Earthy, grounded and sophisticated' },
+  { id: 'fresh', name: 'Fresh', emoji: '🍃', description: 'Crisp, airy and energising' },
+  { id: 'citrus', name: 'Citrus', emoji: '🍊', description: 'Bright, zesty and uplifting' },
+  { id: 'sweet', name: 'Sweet', emoji: '🍦', description: 'Creamy, delicious and comforting' },
+  { id: 'warm_spicy', name: 'Warm / Spicy', emoji: '🌶️', description: 'Rich, warming and expressive' },
+  { id: 'aquatic_clean', name: 'Aquatic / Clean', emoji: '🌊', description: 'Cool, watery and refreshing' },
+];
+
+const fragranceNotes = [
+  { id: 'vanilla', name: 'Vanilla', description: 'Sweet, creamy and comforting' },
+  { id: 'bergamot', name: 'Bergamot', description: 'Bright, fresh and citrusy' },
+  { id: 'rose', name: 'Rose', description: 'Classic, romantic and velvety' },
+  { id: 'jasmine', name: 'Jasmine', description: 'Rich, floral and luminous' },
+  { id: 'lavender', name: 'Lavender', description: 'Clean, calming and aromatic' },
+  { id: 'sandalwood', name: 'Sandalwood', description: 'Smooth, woody and creamy' },
+  { id: 'musk', name: 'Musk', description: 'Soft, warm and skin-like' },
+  { id: 'amber', name: 'Amber', description: 'Warm, resinous and sensual' },
+  { id: 'citrus', name: 'Citrus', description: 'Juicy, sparkling and lively' },
+  { id: 'oud', name: 'Oud', description: 'Deep, smoky and luxurious' },
+  { id: 'vetiver', name: 'Vetiver', description: 'Dry, green and earthy' },
+  { id: 'patchouli', name: 'Patchouli', description: 'Earthy, woody and rich' },
 ];
 
 const occasions = [
-  { id: 'daily', name: 'Daily Wear', description: 'For everyday use', emoji: '☀️' },
-  { id: 'work', name: 'Work/Office', description: 'Professional settings', emoji: '💼' },
-  { id: 'evening', name: 'Evening/Night', description: 'Dinner, parties', emoji: '🌙' },
-  { id: 'special', name: 'Special Occasions', description: 'Weddings, events', emoji: '🎉' },
-  { id: 'sport', name: 'Sport/Active', description: 'Gym, outdoors', emoji: '⚡' },
-  { id: 'romantic', name: 'Date Night', description: 'Romantic occasions', emoji: '❤️' },
+  { id: 'everyday', name: 'Everyday', emoji: '☀️', description: 'Easy, versatile daily wear' },
+  { id: 'work_office', name: 'Work / Office', emoji: '💼', description: 'Polished and professional' },
+  { id: 'date_romantic', name: 'Date / Romantic', emoji: '❤️', description: 'Intimate and memorable' },
+  { id: 'evening_night', name: 'Evening / Night', emoji: '🌙', description: 'Confident after-dark wear' },
+  { id: 'special_occasion', name: 'Special Occasion', emoji: '🎉', description: 'Celebrations and important events' },
+  { id: 'sport_outdoors', name: 'Sport / Outdoors', emoji: '⚡', description: 'Active and energising moments' },
+];
+
+const feelings = [
+  { id: 'clean_refreshing', name: 'Clean & refreshing', description: 'Crisp, light and effortless' },
+  { id: 'soft_comforting', name: 'Soft & comforting', description: 'Gentle, calming and familiar' },
+  { id: 'elegant_sophisticated', name: 'Elegant & sophisticated', description: 'Refined, polished and timeless' },
+  { id: 'sweet_cozy', name: 'Sweet & cozy', description: 'Warm, delicious and inviting' },
+  { id: 'bold_sensual', name: 'Bold & sensual', description: 'Striking, confident and magnetic' },
+  { id: 'warm_luxurious', name: 'Warm & luxurious', description: 'Rich, opulent and enveloping' },
+  { id: 'energetic_uplifting', name: 'Energetic & uplifting', description: 'Bright, lively and optimistic' },
+];
+
+const budgets = [
+  { id: 'budget_friendly', name: 'Budget friendly', range: 'RM 50 – RM 150' },
+  { id: 'mid_range', name: 'Mid-range', range: 'RM 150 – RM 350' },
+  { id: 'premium', name: 'Premium', range: 'RM 350 – RM 600' },
+  { id: 'luxury', name: 'Luxury', range: 'RM 600+' },
 ];
 
 const genderOptions = [
-  { id: 'men', name: 'Men', emoji: '👨' },
-  { id: 'women', name: 'Women', emoji: '👩' },
-  { id: 'unisex', name: 'Unisex', emoji: '🌟' },
+  { id: null, name: 'No preference' },
+  { id: 'men', name: "Men's" },
+  { id: 'women', name: "Women's" },
+  { id: 'unisex', name: 'Unisex' },
 ];
 
-const priceRanges = [
-  { id: 'budget', name: 'Budget Friendly', range: 'RM 50 - RM 150', emoji: '💵' },
-  { id: 'mid', name: 'Mid-Range', range: 'RM 150 - RM 350', emoji: '💰' },
-  { id: 'premium', name: 'Premium', range: 'RM 350 - RM 600', emoji: '💎' },
-  { id: 'luxury', name: 'Luxury', range: 'RM 600+', emoji: '👑' },
-];
+function ChoiceCard({ item, selected, onClick, compact = false }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`group relative w-full rounded-2xl border p-4 text-left transition duration-200 ${
+        selected
+          ? 'border-purple-500 bg-purple-50 shadow-sm ring-1 ring-purple-500'
+          : 'border-gray-200 bg-white hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        {item.emoji && <span className={compact ? 'text-2xl' : 'text-3xl'}>{item.emoji}</span>}
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-gray-900">{item.name}</p>
+          {item.description && <p className="mt-1 text-sm leading-5 text-gray-500">{item.description}</p>}
+        </div>
+        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition ${selected ? 'border-purple-600 bg-purple-600 text-white' : 'border-gray-300 text-transparent'}`}>
+          <Check className="h-4 w-4" />
+        </span>
+      </div>
+    </button>
+  );
+}
 
-export default function QuestionnaireFlow() {
+export default function Questionnaire({ savedPreferences = null }) {
   const [step, setStep] = useState(1);
-  const [selectedScents, setSelectedScents] = useState([]);
-  const [selectedOccasions, setSelectedOccasions] = useState([]);
-  const [selectedGender, setSelectedGender] = useState('');
-  const [selectedPriceRange, setSelectedPriceRange] = useState('');
-  const { updateUserPreferences } = useApp();
+  const { data, setData, post, processing, errors } = useForm({
+    scent_characters: savedPreferences?.scent_characters ?? [],
+    preferred_notes: savedPreferences?.preferred_notes ?? [],
+    occasions: savedPreferences?.occasions ?? [],
+    desired_feelings: savedPreferences?.desired_feelings ?? [],
+    budget_key: savedPreferences?.budget_key ?? '',
+    marketed_gender: savedPreferences?.marketed_gender ?? null,
+  });
 
-  const totalSteps = 4;
+  const selectedCount = useMemo(() => ({
+    1: data.scent_characters.length,
+    2: data.preferred_notes.length,
+    3: data.occasions.length,
+    4: data.desired_feelings.length,
+  }), [data]);
 
-  const handleNext = () => {
-    if (step === 1 && selectedScents.length === 0) {
-      toast.error('Please select at least one scent type');
+  const toggle = (field, id, limit) => {
+    const values = data[field];
+    if (values.includes(id)) {
+      setData(field, values.filter((value) => value !== id));
       return;
     }
-    if (step === 2 && selectedOccasions.length === 0) {
-      toast.error('Please select at least one occasion');
+    if (values.length >= limit) {
+      toast.error(`You can select up to ${limit} options.`);
       return;
     }
-    if (step === 3 && !selectedGender) {
-      toast.error('Please select a gender preference');
-      return;
-    }
-    if (step === 4 && !selectedPriceRange) {
-      toast.error('Please select a price range');
-      return;
-    }
-
-    if (step < totalSteps) {
-      setStep(step + 1);
-    } else {
-      handleSubmit();
-    }
+    setData(field, [...values, id]);
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
+  const canContinue = () => {
+    if (step === 1 && data.scent_characters.length === 0) return 'Select at least one scent character.';
+    if (step === 3 && data.occasions.length === 0) return 'Select at least one occasion.';
+    if (step === 4 && data.desired_feelings.length === 0) return 'Select at least one desired feeling.';
+    if (step === 5 && !data.budget_key) return 'Choose a budget range.';
+    return null;
   };
 
-  const toggleSelection = (id, list, setList) => {
-    if (list.includes(id)) {
-      setList(list.filter(item => item !== id));
-    } else {
-      setList([...list, id]);
+  const next = () => {
+    const message = canContinue();
+    if (message) {
+      toast.error(message);
+      return;
     }
-  };    
-
-  const handleSubmit = () => {
-    const preferences = {
-      scentTypes: selectedScents,
-      occasions: selectedOccasions,
-      gender: selectedGender,
-      priceRange: selectedPriceRange,
-    };
-    updateUserPreferences(preferences);
-    toast.success('Preferences saved! Redirecting to recommendations...');
-    setTimeout(() => {
-      router.visit('/products');
-    }, 1500);
+    setStep((current) => Math.min(5, current + 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const back = () => {
+    setStep((current) => Math.max(1, current - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const submit = (event) => {
+    event.preventDefault();
+    const message = canContinue();
+    if (message) {
+      toast.error(message);
+      return;
+    }
+    post('/questionnaire', {
+      preserveScroll: true,
+      onError: () => toast.error('Please review your selections and try again.'),
+    });
+  };
+
+  const current = steps[step - 1];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-gray-50 to-pink-50">
+      <Head title="Find Your Scent" />
       <Navigation />
 
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl">Find Your Perfect Scent</h1>
-            <span className="text-sm text-gray-500">
-              Step {step} of {totalSteps}
-            </span>
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg shadow-purple-200">
+            <Sparkles className="h-6 w-6" />
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
-              style={{ width: `${(step / totalSteps) * 100}%` }}
-            />
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-purple-600">Personal scent profile</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">Find a fragrance that feels like you</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-gray-600">Five quick steps help us understand your taste. There are no wrong answers, and you can update them anytime.</p>
+        </div>
+
+        <div className="mb-8 rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm backdrop-blur sm:p-5">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {steps.map((item, index) => (
+              <div key={item.number} className="flex flex-1 items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => item.number < step && setStep(item.number)}
+                  disabled={item.number > step}
+                  className="flex min-w-0 flex-1 flex-col items-center gap-2 sm:flex-row"
+                >
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition ${item.number < step ? 'bg-emerald-500 text-white' : item.number === step ? 'bg-purple-600 text-white ring-4 ring-purple-100' : 'bg-gray-100 text-gray-400'}`}>
+                    {item.number < step ? <Check className="h-4 w-4" /> : item.number}
+                  </span>
+                  <span className={`hidden truncate text-xs sm:block ${item.number === step ? 'font-semibold text-purple-700' : 'text-gray-500'}`}>{item.short}</span>
+                </button>
+                {index < steps.length - 1 && <div className={`hidden h-px flex-1 sm:block ${item.number < step ? 'bg-emerald-300' : 'bg-gray-200'}`} />}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          {step === 1 && (
-            <div>
-              <h2 className="text-2xl mb-2">What scent types do you prefer?</h2>
-              <p className="text-gray-600 mb-6">Select all that appeal to you</p>
-              <div className="grid md:grid-cols-2 gap-4">
-                {scentTypes.map((scent) => (
-                  <button
-                    key={scent.id}
-                    onClick={() => toggleSelection(scent.id, selectedScents, setSelectedScents)}
-                    className={`p-4 rounded-xl border-2 text-left transition ${
-                      selectedScents.includes(scent.id)
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">{scent.emoji}</span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="mb-1">{scent.name}</h3>
-                          {selectedScents.includes(scent.id) && (
-                            <Check className="w-5 h-5 text-purple-600" />
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600">{scent.description}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+        <form onSubmit={submit} className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xl shadow-purple-100/60">
+          <div className="border-b border-gray-100 px-6 py-6 sm:px-10 sm:py-8">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="mb-2 text-sm font-medium text-purple-600">Step {step} of 5</p>
+                <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{current.title}</h2>
+                <p className="mt-2 text-gray-500">{current.subtitle}</p>
               </div>
+              {step < 5 && (
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
+                  {step === 2 ? `${selectedCount[step]}/5 selected` : `${selectedCount[step]}/3 selected`}
+                </span>
+              )}
             </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <h2 className="text-2xl mb-2">When will you wear this fragrance?</h2>
-              <p className="text-gray-600 mb-6">Select all occasions that apply</p>
-              <div className="grid md:grid-cols-2 gap-4">
-                {occasions.map((occasion) => (
-                  <button
-                    key={occasion.id}
-                    onClick={() => toggleSelection(occasion.id, selectedOccasions, setSelectedOccasions)}
-                    className={`p-4 rounded-xl border-2 text-left transition ${
-                      selectedOccasions.includes(occasion.id)
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">{occasion.emoji}</span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="mb-1">{occasion.name}</h3>
-                          {selectedOccasions.includes(occasion.id) && (
-                            <Check className="w-5 h-5 text-purple-600" />
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600">{occasion.description}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <h2 className="text-2xl mb-2">Which category do you prefer?</h2>
-              <p className="text-gray-600 mb-6">Choose one</p>
-              <div className="grid md:grid-cols-3 gap-4">
-                {genderOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setSelectedGender(option.id)}
-                    className={`p-6 rounded-xl border-2 text-center transition ${
-                      selectedGender === option.id
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <span className="text-5xl mb-3 block">{option.emoji}</span>
-                    <h3>{option.name}</h3>
-                    {selectedGender === option.id && (
-                      <Check className="w-5 h-5 text-purple-600 mx-auto mt-2" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div>
-              <h2 className="text-2xl mb-2">What's your budget?</h2>
-              <p className="text-gray-600 mb-6">Select your preferred price range</p>
-              <div className="grid md:grid-cols-2 gap-4">
-                {priceRanges.map((price) => (
-                  <button
-                    key={price.id}
-                    onClick={() => setSelectedPriceRange(price.id)}
-                    className={`p-6 rounded-xl border-2 text-left transition ${
-                      selectedPriceRange === price.id
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-4xl">{price.emoji}</span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="mb-1">{price.name}</h3>
-                          {selectedPriceRange === price.id && (
-                            <Check className="w-5 h-5 text-purple-600" />
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600">{price.range}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-            <button
-              onClick={handleBack}
-              disabled={step === 1}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Back
-            </button>
-            <button
-              onClick={handleNext}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition"
-            >
-              {step === totalSteps ? 'Get Recommendations' : 'Next'}
-              {step < totalSteps && <ChevronRight className="w-5 h-5" />}
-            </button>
           </div>
-        </div>
-      </div>
+
+          <div className="min-h-[390px] px-6 py-7 sm:px-10 sm:py-9">
+            {step === 1 && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{scentCharacters.map((item) => <ChoiceCard key={item.id} item={item} selected={data.scent_characters.includes(item.id)} onClick={() => toggle('scent_characters', item.id, 3)} />)}</div>}
+
+            {step === 2 && (
+              <>
+                <div className="mb-5 flex items-start gap-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-800">
+                  <CircleHelp className="mt-0.5 h-5 w-5 shrink-0" />
+                  <p>Not familiar with fragrance notes? That is completely fine—leave this step empty and we will recommend from your other preferences.</p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{fragranceNotes.map((item) => <ChoiceCard key={item.id} item={item} compact selected={data.preferred_notes.includes(item.id)} onClick={() => toggle('preferred_notes', item.id, 5)} />)}</div>
+              </>
+            )}
+
+            {step === 3 && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{occasions.map((item) => <ChoiceCard key={item.id} item={item} selected={data.occasions.includes(item.id)} onClick={() => toggle('occasions', item.id, 3)} />)}</div>}
+
+            {step === 4 && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{feelings.map((item) => <ChoiceCard key={item.id} item={item} selected={data.desired_feelings.includes(item.id)} onClick={() => toggle('desired_feelings', item.id, 3)} />)}</div>}
+
+            {step === 5 && (
+              <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+                <section>
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-gray-900">Your budget</h3>
+                    <p className="mt-1 text-sm text-gray-500">Choose the amount you are comfortable spending.</p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {budgets.map((budget) => <ChoiceCard key={budget.id} item={{ ...budget, description: budget.range }} selected={data.budget_key === budget.id} onClick={() => setData('budget_key', budget.id)} />)}
+                  </div>
+                </section>
+                <section className="rounded-2xl bg-gray-50 p-5 sm:p-6">
+                  <h3 className="font-semibold text-gray-900">Marketed category <span className="font-normal text-gray-400">(optional)</span></h3>
+                  <p className="mt-1 text-sm leading-5 text-gray-500">This is a light shopping preference, not a judgment about which scents suit you.</p>
+                  <div className="mt-5 space-y-2">
+                    {genderOptions.map((option) => (
+                      <button key={option.name} type="button" onClick={() => setData('marketed_gender', option.id)} className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition ${data.marketed_gender === option.id ? 'border-purple-500 bg-white font-medium text-purple-700 shadow-sm' : 'border-gray-200 bg-white/60 text-gray-700 hover:border-purple-300'}`}>
+                        {option.name}
+                        {data.marketed_gender === option.id && <CheckCircle2 className="h-5 w-5 text-purple-600" />}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {Object.keys(errors).length > 0 && (
+              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {Object.values(errors)[0]}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/70 px-6 py-5 sm:px-10">
+            <button type="button" onClick={back} disabled={step === 1 || processing} className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            {step < 5 ? (
+              <button type="button" onClick={next} className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-200 transition hover:bg-purple-700">
+                Continue <ArrowRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button type="submit" disabled={processing} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-200 transition hover:from-purple-700 hover:to-pink-600 disabled:cursor-wait disabled:opacity-60">
+                <Sparkles className="h-4 w-4" /> {processing ? 'Saving…' : savedPreferences ? 'Update my profile' : 'Find my fragrances'}
+              </button>
+            )}
+          </div>
+        </form>
+      </main>
     </div>
   );
 }
