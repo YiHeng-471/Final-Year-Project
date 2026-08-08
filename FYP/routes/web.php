@@ -18,10 +18,9 @@ use Inertia\Inertia;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+// HomePage
 Route::get('/', function () {
-    return Inertia::render('HomePage'); 
-});
-
+    return Inertia::render('HomePage');})->name('home'); 
 
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products');
