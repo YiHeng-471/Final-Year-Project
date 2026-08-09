@@ -9,10 +9,11 @@ class PerfumeCategorySeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('perfume_categories')->insert([
-            ['name' => 'Floral', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Woody', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Fresh', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach (['Uncategorised', 'Floral', 'Woody', 'Fresh'] as $name) {
+            DB::table('perfume_categories')->updateOrInsert(
+                ['name' => $name],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
     }
 }

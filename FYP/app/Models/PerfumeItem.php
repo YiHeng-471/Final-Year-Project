@@ -13,13 +13,20 @@ class PerfumeItem extends Model
     use HasFactory;
 
     protected $fillable = [
+        'dataset_id',
         'category_id',
+        'brand',
         'name',
         'description',
         'image_url',
         'availability_status',
-        'scent-notes',
+        'scent_notes',
         'tags',
+    ];
+
+    protected $casts = [
+        'dataset_id' => 'integer',
+        'availability_status' => 'boolean',
     ];
 
     public function perfumeCategory(): BelongsTo

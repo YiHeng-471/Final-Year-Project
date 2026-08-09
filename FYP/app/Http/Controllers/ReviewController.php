@@ -15,6 +15,7 @@ class ReviewController extends Controller
             'order_id' => 'required|exists:orders,id',
             'perfume_item_id' => 'required|exists:perfume_items,id',
             'content' => 'required|string',
+            'rating' => 'required|integer|between:1,5',
         ]);
 
         $order = Order::with('orderItems')->findOrFail($request->order_id);
@@ -39,6 +40,7 @@ class ReviewController extends Controller
             'order_id' => $order->id,
             'perfume_item_id' => $request->perfume_item_id,
             'content' => $request->content,
+            'rating' => $request->rating,
         ]);
 
         return redirect()->back()->with('success', 'Review submitted successfully!');
@@ -49,10 +51,14 @@ class ReviewController extends Controller
         $validated = $request->validate([
             'edit_review_id' => 'required|exists:perfume_reviews,id',
             'edit_review_content' => 'required|string',
+            'edit_review_rating' => 'required|integer|between:1,5',
         ]);
 
         $affectedRows = PerfumeReview::where('id', $validated['edit_review_id'])
-            ->update(['content' => $validated['edit_review_content']]);
+            ->update([
+                'content' => $validated['edit_review_content'],
+                'rating' => $validated['edit_review_rating'],
+            ]);
         
         if ($affectedRows === 0) {
             return redirect()->back()->with('error', 'Review not found or no changes made.');

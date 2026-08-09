@@ -1,238 +1,109 @@
-import { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
-import Navigation from './Navigation';
-import { Star, Heart, ShoppingCart, Info, ArrowLeft } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Heart, ShoppingCart, Sparkles, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import Navigation from './Navigation';
 
-const productData = {
-  '1': {
-    id: '1',
-    name: 'Midnight Rose',
-    brand: 'Essence Luxe',
-    price: 289,
-    image: '🌹',
-    rating: 4.8,
-    reviews: 234,
-    description: 'A captivating blend of rose petals and warm amber, perfect for evening wear. This luxurious fragrance opens with notes of Bulgarian rose and jasmine, settling into a deep, sensual base of amber and vanilla.',
-    scentType: ['Floral', 'Oriental'],
-    occasion: ['Evening', 'Romantic'],
-    gender: 'Women',
-    sizes: ['30ml', '50ml', '100ml'],
-    notes: {
-      top: ['Bulgarian Rose', 'Bergamot', 'Pink Pepper'],
-      middle: ['Jasmine', 'Peony', 'Damask Rose'],
-      base: ['Amber', 'Vanilla', 'Musk'],
-    },
-    longevity: '8-10 hours',
-    sillage: 'Moderate to Heavy',
-  },
-};
-
-// Accept backend props directly into the component
-export default function ProductDetail({ product: serverProduct, id = null }) {
-  const [selectedSize, setSelectedSize] = useState('50ml');
+export default function ProductDetail({ product }) {
+  const [selectedSizeId, setSelectedSizeId] = useState(product.sizes?.[0]?.id ?? null);
   const [quantity, setQuantity] = useState(1);
 
-  const addToCart = (payload) => {
-    router.post('/cart', payload, {
-      onSuccess: () => {
-        toast.success('Added to cart!');
-      },
-    });
-  };
+  const selectedSize = product.sizes?.find((size) => size.id === selectedSizeId);
+  const notes = useMemo(
+    () => (product.scent_notes || '').split(',').map((note) => note.trim()).filter(Boolean),
+    [product.scent_notes],
+  );
+  const ratings = (product.perfume_reviews || []).map((review) => Number(review.rating)).filter(Boolean);
+  const averageRating = ratings.length
+    ? ratings.reduce((total, rating) => total + rating, 0) / ratings.length
+    : 0;
 
-  // Safe fallback to mock data if backend isn't sending a product object yet
-  const product = serverProduct || productData[id || '1'] || productData['1'];
+  const addToCart = () => {
+    if (!selectedSizeId) {
+      toast.error('Please choose a size.');
+      return;
+    }
 
-  const handleAddToCart = () => {
-    // If product comes from server it should include sizes with pivot prices
-    const sizeObj = product.sizes?.find((s) => s.name === selectedSize) || {};
-
-    addToCart({
+    router.post('/cart', {
       perfume_item_id: product.id,
-      size_id: sizeObj.id || null,
+      size_id: selectedSizeId,
       quantity,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => toast.success('Added to cart.'),
+      onError: () => toast.error('Sign in and select an available size to add this fragrance.'),
     });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Head title={product.name} />
       <Navigation />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <Link
-          href="/products"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-purple-600 mb-6 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Products
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <Link href="/products" className="mb-7 inline-flex items-center gap-2 text-sm text-gray-600 transition hover:text-purple-600">
+          <ArrowLeft className="h-4 w-4" /> Back to products
         </Link>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          <div className="bg-white rounded-2xl p-8">
-            <div className="aspect-square flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl mb-6">
-              <span className="text-9xl">{product.image}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-square flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg cursor-pointer hover:opacity-75 transition"
-                >
-                  <span className="text-4xl">{product.image}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="grid gap-10 lg:grid-cols-2">
+          <section className="flex min-h-[480px] items-center justify-center overflow-hidden rounded-3xl border border-purple-100 bg-gradient-to-br from-purple-50 to-pink-50 p-8">
+            {product.image_url ? (
+              <img src={product.image_url} alt={product.name} className="max-h-[520px] w-full object-contain" />
+            ) : (
+              <Sparkles className="h-28 w-28 text-purple-300" />
+            )}
+          </section>
 
-          <div>
-            <div className="mb-6">
-              <p className="text-gray-500 mb-2">{product.brand}</p>
-              <h1 className="text-4xl mb-4">{product.name}</h1>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">
-                  {product.rating} ({product.reviews} reviews)
-                </span>
+          <section className="py-2">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-purple-600">{product.brand}</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-tight text-gray-900">{product.name}</h1>
+
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+              <Star className={`h-5 w-5 ${ratings.length ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+              <span>{ratings.length ? `${averageRating.toFixed(1)} from ${ratings.length} review${ratings.length === 1 ? '' : 's'}` : 'Not reviewed yet'}</span>
+            </div>
+
+            <p className="mt-7 leading-7 text-gray-600">{product.description}</p>
+
+            <div className="mt-8">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-gray-900">Choose a size</h2>
+                {selectedSize && <span className="text-xl font-semibold text-purple-700">RM {Number(selectedSize.pivot.price).toFixed(2)}</span>}
               </div>
-              <p className="text-3xl text-purple-600 mb-6">RM {product.price}</p>
-              <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
-            </div>
-
-            <div className="space-y-6 mb-8">
-              <div>
-                <label className="block text-sm mb-3">Size</label>
-                <div className="flex gap-3">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-6 py-3 rounded-lg border-2 transition ${
-                        selectedSize === size
-                          ? 'border-purple-600 bg-purple-50'
-                          : 'border-gray-200 hover:border-purple-300'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm mb-3">Quantity</label>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50"
-                  >
-                    -
+              <div className="flex flex-wrap gap-3">
+                {(product.sizes || []).map((size) => (
+                  <button key={size.id} type="button" onClick={() => setSelectedSizeId(size.id)} className={`rounded-xl border px-5 py-3 text-sm font-medium transition ${selectedSizeId === size.id ? 'border-purple-600 bg-purple-50 text-purple-700 ring-1 ring-purple-600' : 'border-gray-200 bg-white text-gray-700 hover:border-purple-300'}`}>
+                    {size.name}
                   </button>
-                  <span className="w-12 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-lg border border-gray-300 hover:bg-gray-50"
-                  >
-                    +
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="flex gap-4 mb-8">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-lg hover:from-purple-700 hover:to-pink-700 transition flex items-center justify-center gap-2"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
+            <div className="mt-7 flex items-center gap-4">
+              <div className="flex items-center rounded-xl border border-gray-200 bg-white">
+                <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="h-12 w-12 text-xl text-gray-600 hover:bg-gray-50">−</button>
+                <span className="w-10 text-center font-medium">{quantity}</span>
+                <button type="button" onClick={() => setQuantity(Math.min(99, quantity + 1))} className="h-12 w-12 text-xl text-gray-600 hover:bg-gray-50">+</button>
+              </div>
+              <button type="button" onClick={addToCart} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-5 py-3.5 font-semibold text-white shadow-lg shadow-purple-200 transition hover:from-purple-700 hover:to-pink-600">
+                <ShoppingCart className="h-5 w-5" /> Add to cart
               </button>
-              <button className="w-14 h-14 border-2 border-gray-300 rounded-lg hover:border-purple-600 hover:bg-purple-50 transition flex items-center justify-center">
-                <Heart className="w-6 h-6" />
+              <button type="button" aria-label="Save fragrance" className="flex h-12 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition hover:border-pink-300 hover:text-pink-500">
+                <Heart className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h4 className="mb-1">Scent Profile</h4>
-                  <p className="text-sm text-gray-600">
-                    {product.scentType.join(', ')}
-                  </p>
+            <div className="mt-9 rounded-2xl border border-gray-100 bg-white p-5">
+              <h2 className="font-semibold text-gray-900">Fragrance notes</h2>
+              {notes.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {notes.map((note, index) => <span key={`${note}-${index}`} className="rounded-full bg-purple-50 px-3 py-1.5 text-sm text-purple-800">{note}</span>)}
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h4 className="mb-1">Best For</h4>
-                  <p className="text-sm text-gray-600">
-                    {product.occasion.join(', ')} • {product.gender}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-purple-600 mt-0.5" />
-                <div>
-                  <h4 className="mb-1">Performance</h4>
-                  <p className="text-sm text-gray-600">
-                    Longevity: {product.longevity} • Sillage: {product.sillage}
-                  </p>
-                </div>
-              </div>
+              ) : <p className="mt-2 text-sm text-gray-500">Detailed notes are not available for this fragrance.</p>}
             </div>
-          </div>
+          </section>
         </div>
-
-        <div className="mt-12 grid md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-xl p-6">
-            <h3 className="mb-4">Top Notes</h3>
-            <div className="space-y-2">
-              {product.notes.top.map((note) => (
-                <div key={note} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-600 rounded-full" />
-                  <span className="text-sm text-gray-700">{note}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl p-6">
-            <h3 className="mb-4">Middle Notes</h3>
-            <div className="space-y-2">
-              {product.notes.middle.map((note) => (
-                <div key={note} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
-                  <span className="text-sm text-gray-700">{note}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6">
-            <h3 className="mb-4">Base Notes</h3>
-            <div className="space-y-2">
-              {product.notes.base.map((note) => (
-                <div key={note} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-amber-700 rounded-full" />
-                  <span className="text-sm text-gray-700">{note}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

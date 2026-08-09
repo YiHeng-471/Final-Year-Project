@@ -12,8 +12,13 @@ class PerfumeReview extends Model
 
     protected $fillable = [
         'content',
+        'rating',
         'user_id',
         'perfume_item_id'
+    ];
+
+    protected $casts = [
+        'rating' => 'integer',
     ];
 
     public function user(): BelongsTo
