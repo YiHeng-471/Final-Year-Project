@@ -24,6 +24,11 @@ export default function Navigation({ children }) {
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
+            {user && (
+              <Link href="/recommendations" className="text-gray-700 hover:text-purple-600 transition">
+                For You
+              </Link>
+            )}
             <Link href="/products" className="text-gray-700 hover:text-purple-600 transition">
               Shop
             </Link>

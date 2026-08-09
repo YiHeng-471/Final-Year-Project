@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\QuestionnaireController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -96,4 +97,5 @@ Route::middleware(['auth'])->group(function () {
     // Fragrance preference questionnaire
     Route::get('/questionnaire', [QuestionnaireController::class, 'show'])->name('questionnaire.show');
     Route::post('/questionnaire', [QuestionnaireController::class, 'store'])->name('questionnaire.store');
+    Route::get('/recommendations', [RecommendationController::class, 'index'])->name('recommendations.index');
 });

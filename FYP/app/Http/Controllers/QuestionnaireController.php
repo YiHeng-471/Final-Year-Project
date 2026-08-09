@@ -98,7 +98,7 @@ class QuestionnaireController extends Controller
 
         $request->user()->forceFill(['has_completed_questionnaire' => true])->save();
 
-        return to_route('products')->with('success', 'Your fragrance preferences have been saved.');
+        return to_route('recommendations.index')->with('success', 'Your fragrance preferences have been saved.');
     }
 
     private function buildSemanticProfile(array $answers): string

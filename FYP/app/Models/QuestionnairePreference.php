@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class QuestionnairePreference extends Model
 {
     protected $fillable = [
+        'user_id',
         'scent_characters',
         'preferred_notes',
         'occasions',

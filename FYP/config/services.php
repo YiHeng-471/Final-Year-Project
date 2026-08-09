@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'recommendations' => [
+        'url' => env('ML_RECOMMENDATION_URL', 'http://127.0.0.1:8001'),
+        'timeout' => env('ML_RECOMMENDATION_TIMEOUT', 30),
+    ],
+
 ];

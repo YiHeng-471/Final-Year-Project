@@ -40,7 +40,7 @@ class QuestionnaireTest extends TestCase
 
         $this->actingAs($user)
             ->post('/questionnaire', $answers)
-            ->assertRedirect(route('products'));
+            ->assertRedirect(route('recommendations.index'));
 
         $this->assertDatabaseHas('questionnaire_preferences', [
             'user_id' => $user->id,
