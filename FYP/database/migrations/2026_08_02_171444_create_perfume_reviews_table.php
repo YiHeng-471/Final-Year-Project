@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('perfume_reviews', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->foreignId('user_id')
                 ->constrained('users');
             $table->foreignId('perfume_item_id')
                 ->constrained('perfume_items');
             $table->string('content');
+            $table->unsignedTinyInteger('rating')
+                ->nullable();
+            $table->timestamps();
         });
     }
 

@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('perfume_items', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('dataset_id')
+                ->nullable()->unique();
             $table->foreignId('category_id')
                 ->constrained('perfume_categories');
+            $table->string('brand')
+                ->default('Unknown');
             $table->string('name');
-            $table->string('description');
-            $table->text('scent-notes')->nullable();
+            $table->text('description');
+            $table->text('scent_notes')->nullable();
             $table->text('tags')->nullable();
-            $table->string('image_url');
+            $table->text('image_url');
             $table->enum('availability_status', [0, 1]);
             $table->timestamps();
         });

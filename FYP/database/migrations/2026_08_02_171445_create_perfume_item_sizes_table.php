@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('perfume_item_sizes', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('perfume_item_id')
                 ->constrained('perfume_items')
                 ->cascadeOnDelete();
@@ -23,6 +24,8 @@ return new class extends Migration
 
             $table->decimal('price');
             $table->timestamps();
+
+            $table->unique(['perfume_item_id', 'size_id']);
         });
     }
 
