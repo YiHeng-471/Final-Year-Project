@@ -10,36 +10,32 @@ use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $user = auth()->user();
 
-        $orders = [];
-        if ($user) {
-            $orders = $user->orders()->with('orderItems.perfumeItem')->get();
-        }
-
-        Inertia::render('ProfilePage', [
-            'auth' => ['user' => $user],
-            'orders' => $orders,
+        return Inertia::render('ProfilePage', [
+            'preference' => $user->questionnairePreference,
+            'orders' => $user->orders()
+                ->with([
+                    'orderItems.perfumeItem:id,name,image_url',
+                    'orderItems.size:id,name',
+                ])
+                ->latest()
+                ->paginate(10),
         ]);
     }
 
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required'
+            'name' => 'required',
         ]);
 
-        $user = User::find(Auth::id());
+        $user = User::findOrFail(Auth::id());
 
         $user->update([
-            'name' => $validated['name']
+            'name' => $validated['name'],
         ]);
 
         return redirect()->back()->with('success', 'Successfully updated name');
@@ -50,14 +46,14 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'street_address' => 'required',
             'postcode' => 'required|digits:5',
-            'state_id' => 'required|exists:states,id'
+            'state_id' => 'required|exists:states,id',
         ]);
 
         Address::create([
             'street_address' => $validated['street_address'],
             'postcode' => $validated['postcode'],
             'state_id' => $validated['state_id'],
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
         ]);
 
         return redirect()->back()->with('success', 'Successfully added new address');
@@ -69,21 +65,16 @@ class ProfileController extends Controller
             'edit_address_id' => 'required|exists:addresses,id',
             'edit_street_address' => 'required',
             'edit_postcode' => 'required|digits:5',
-            'edit_state_id' => 'required|exists:states,id'
+            'edit_state_id' => 'required|exists:states,id',
         ]);
 
-
-        $address = Address::find($validated['edit_address_id']);
-
-
-        if (!$address) {
-            return redirect()->back()->with('error', 'Address not found');
-        }
+        $address = Address::where('user_id', Auth::id())
+            ->findOrFail($validated['edit_address_id']);
 
         $address->update([
             'street_address' => $validated['edit_street_address'],
             'postcode' => $validated['edit_postcode'],
-            'state_id' => $validated['edit_state_id']
+            'state_id' => $validated['edit_state_id'],
         ]);
 
         return redirect()->back()->with('success', 'Successfully updated address');
@@ -91,9 +82,7 @@ class ProfileController extends Controller
 
     public function deleteAddress(Address $address)
     {
-        if (!$address) {
-            return redirect()->back()->with('error', 'Address not found');
-        }
+        abort_unless($address->user_id === Auth::id(), 403);
 
         $addressCount = Address::where('user_id', Auth::id())->count();
 

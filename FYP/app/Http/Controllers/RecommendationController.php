@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PerfumeItem;
 use App\Services\RecommendationService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -12,11 +13,9 @@ use RuntimeException;
 
 class RecommendationController extends Controller
 {
-    public function __construct(private readonly RecommendationService $recommendations)
-    {
-    }
+    public function __construct(private readonly RecommendationService $recommendations) {}
 
-    public function index(Request $request): Response|\Illuminate\Http\RedirectResponse
+    public function index(Request $request): Response|RedirectResponse
     {
         $preferences = $request->user()->questionnairePreference;
 
@@ -62,7 +61,9 @@ class RecommendationController extends Controller
 
         $ranking = collect($ranked)->keyBy('dataset_id');
         $products = PerfumeItem::query()
-            ->with(['sizes', 'perfumeReviews'])
+            ->with('sizes')
+            ->withAvg('perfumeReviews as average_rating', 'rating')
+            ->withCount('perfumeReviews')
             ->whereIn('dataset_id', $ranking->keys())
             ->get()
             ->sortBy(fn (PerfumeItem $item) => array_search($item->dataset_id, $ranking->keys()->all(), true))
@@ -90,8 +91,8 @@ class RecommendationController extends Controller
                         'name' => $size->name,
                         'price' => (float) $size->pivot->price,
                     ])->values(),
-                    'average_rating' => round((float) $item->perfumeReviews->avg('rating'), 1),
-                    'review_count' => $item->perfumeReviews->count(),
+                    'average_rating' => round((float) $item->average_rating, 1),
+                    'review_count' => $item->perfume_reviews_count,
                     'score' => $recommendation['score'],
                     'semantic_score' => $recommendation['semantic_score'],
                     'note_score' => $recommendation['note_score'],

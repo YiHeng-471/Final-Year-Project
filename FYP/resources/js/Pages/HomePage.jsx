@@ -1,11 +1,10 @@
-import { Link } from '@inertiajs/react';
-import { useApp } from '../AppContext';
+import { Link, usePage } from '@inertiajs/react';
 import Navigation from './Navigation';
 import { Sparkles, Heart, Search, TrendingUp } from 'lucide-react';
 
 export default function HomePage() {
-  const { user } = useApp();
-  const hasPreferences = user?.preferences !== undefined;
+  const user = usePage().props.auth?.user;
+  const hasPreferences = Boolean(user?.has_completed_questionnaire);
 
   const featuredCategories = [
     { name: 'Floral', image: '🌸', description: 'Romantic & Delicate' },
@@ -20,7 +19,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-8 md:p-12 text-white mb-12">
           <h1 className="text-4xl md:text-5xl mb-5">
-            {user?.data?.name ? `Welcome, ${user.data.name}!` : "Welcome Guest!"}
+            {user?.name ? `Welcome, ${user.name}!` : "Welcome Guest!"}
           </h1>
           <p className="text-lg text-purple-100 mb-8">
             {hasPreferences
@@ -37,7 +36,7 @@ export default function HomePage() {
             </Link>
           ) : (
             <Link
-              to="/products"
+              href="/products"
               className="inline-flex items-center gap-2 bg-white text-purple-600 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
             >
               <Search className="w-5 h-5" />
@@ -89,7 +88,7 @@ export default function HomePage() {
             {featuredCategories.map((category) => (
               <Link
                 key={category.name}
-                to={`/products?category=${category.name.toLowerCase()}`}
+                href={`/products?category=${category.name.toLowerCase()}`}
                 className="bg-white rounded-xl p-6 text-center hover:shadow-lg transition group"
               >
                 <div className="text-4xl mb-3">{category.image}</div>
@@ -110,13 +109,13 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link
-              to="/guide/scent-types"
+              href="/guide/scent-types"
               className="bg-white px-6 py-3 rounded-lg hover:shadow-lg transition"
             >
               Learn About Scent Types
             </Link>
             <Link
-              to="/guide/fragrance-notes"
+              href="/guide/fragrance-notes"
               className="bg-white px-6 py-3 rounded-lg hover:shadow-lg transition"
             >
               Understand Fragrance Notes

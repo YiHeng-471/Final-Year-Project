@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useForm, Link } from '@inertiajs/react'
 import { Sparkles, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'

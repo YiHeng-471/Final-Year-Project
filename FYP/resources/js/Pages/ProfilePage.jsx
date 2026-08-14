@@ -1,178 +1,66 @@
 import { Link, usePage } from '@inertiajs/react';
 import Navigation from './Navigation';
-import { User, Settings, Package, Heart, Sparkles } from 'lucide-react';
+import { Package, Sparkles, User } from 'lucide-react';
+
+const labels = (values = []) => values.map((value) => value.replaceAll('_', ' '));
 
 export default function ProfilePage() {
-  const { auth } = usePage().props || {};
+  const { auth, preference, orders } = usePage().props;
   const user = auth?.user;
-
-  const { orders = [] } = usePage().props || {};
-
-  const preferences = user?.preferences;
+  const orderList = orders?.data ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <h1 className="text-3xl mb-8">My Profile</h1>
-
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-white" />
+      <main className="mx-auto max-w-7xl px-4 py-12">
+        <h1 className="mb-8 text-3xl">My Profile</h1>
+        <div className="grid gap-8 lg:grid-cols-3">
+          <aside className="space-y-6">
+            <section className="rounded-xl bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
+                  <User className="h-8 w-8 text-white" />
                 </div>
-                <div>
-                  <h2 className="text-xl">{user?.name}</h2>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
-                </div>
+                <div><h2 className="text-xl">{user?.name}</h2><p className="text-sm text-gray-500">{user?.email}</p></div>
               </div>
+            </section>
 
-              <div className="space-y-3">
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition text-left">
-                  <User className="w-5 h-5 text-gray-600" />
-                  <span>Account Settings</span>
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition text-left">
-                  <Settings className="w-5 h-5 text-gray-600" />
-                  <span>Preferences</span>
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition text-left">
-                  <Heart className="w-5 h-5 text-gray-600" />
-                  <span>Wishlist</span>
-                </button>
-              </div>
-            </div>
-
-            {preferences && (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  <h3>Your Preferences</h3>
-                </div>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Scent Types</p>
-                    <div className="flex flex-wrap gap-2">
-                      {preferences.scentTypes.map((scent) => (
-                        <span
-                          key={scent}
-                          className="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full capitalize"
-                        >
-                          {scent}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Occasions</p>
-                    <div className="flex flex-wrap gap-2">
-                      {preferences.occasions.map((occasion) => (
-                        <span
-                          key={occasion}
-                          className="px-3 py-1 bg-pink-100 text-pink-700 text-sm rounded-full capitalize"
-                        >
-                          {occasion}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-600 mb-2">Category</p>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full capitalize">
-                      {preferences.gender}
-                    </span>
-                  </div>
-                </div>
-
-                <Link
-                  href="/questionnaire"
-                  className="w-full mt-4 text-center text-purple-600 hover:text-purple-700 text-sm block"
-                >
-                  Update Preferences
-                </Link>
-              </div>
-            )}
-          </div>
-
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl p-8 shadow-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <Package className="w-6 h-6 text-purple-600" />
-                <h2 className="text-xl">Order History</h2>
-              </div>
-
-              {orders.length === 0 ? (
-                <div className="text-center py-12">
-                  <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 mb-4">No orders yet</p>
-                    <Link
-                      href="/products"
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition"
-                    >
-                    Start Shopping
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {mockOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="border border-gray-200 rounded-xl p-6"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="mb-1">Order {order.id}</h3>
-                          <p className="text-sm text-gray-500">
-                            Placed on {new Date(order.date).toLocaleDateString('en-MY', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
-                          {order.status}
-                        </span>
-                      </div>
-
-                      <div className="space-y-3 mb-4">
-                        {order.items.map((item, index) => (
-                          <div key={index} className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
-                              <span className="text-3xl">{item.image}</span>
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-sm">{item.name}</h4>
-                              <p className="text-sm text-gray-500">
-                                RM {item.price.toFixed(2)}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="text-lg">
-                          Total: RM {order.total.toFixed(2)}
-                        </span>
-                        <button className="text-purple-600 hover:text-purple-700 text-sm">
-                          View Details
-                        </button>
-                      </div>
-                    </div>
+            <section className="rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+              <div className="mb-4 flex items-center gap-2"><Sparkles className="h-5 w-5 text-purple-600" /><h3>Your Preferences</h3></div>
+              {preference ? (
+                <div className="space-y-4 text-sm">
+                  {[
+                    ['Scent character', preference.scent_characters],
+                    ['Preferred notes', preference.preferred_notes],
+                    ['Occasions', preference.occasions],
+                    ['Desired feeling', preference.desired_feelings],
+                  ].map(([title, values]) => values?.length > 0 && (
+                    <div key={title}><p className="mb-2 text-gray-600">{title}</p><div className="flex flex-wrap gap-2">{labels(values).map((value) => <span key={value} className="rounded-full bg-white px-3 py-1 capitalize text-purple-700">{value}</span>)}</div></div>
                   ))}
+                  <p className="text-gray-600">Budget: RM {preference.budget_min}{preference.budget_max ? `–${preference.budget_max}` : '+'}</p>
+                  {preference.marketed_gender && preference.marketed_gender !== 'no_preference' && <p className="text-gray-600">Stated shopping preference: <span className="capitalize">{preference.marketed_gender}</span></p>}
                 </div>
-              )}
-            </div>
-          </div>
+              ) : <p className="text-sm text-gray-600">You have not completed the questionnaire yet.</p>}
+              <Link href="/questionnaire" className="mt-5 block text-sm text-purple-700">{preference ? 'Update preferences' : 'Complete questionnaire'}</Link>
+            </section>
+          </aside>
+
+          <section className="rounded-xl bg-white p-8 shadow-sm lg:col-span-2">
+            <div className="mb-6 flex items-center gap-3"><Package className="h-6 w-6 text-purple-600" /><h2 className="text-xl">Order History</h2></div>
+            {orderList.length === 0 ? (
+              <div className="py-12 text-center"><Package className="mx-auto mb-4 h-16 w-16 text-gray-300" /><p className="mb-4 text-gray-500">No orders yet</p><Link href="/products" className="inline-block rounded-lg bg-purple-600 px-6 py-3 text-white">Start Shopping</Link></div>
+            ) : (
+              <div className="space-y-5">{orderList.map((order) => (
+                <article key={order.id} className="rounded-xl border border-gray-200 p-5">
+                  <div className="mb-4 flex justify-between"><div><h3>Order #{order.id}</h3><p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('en-MY')}</p></div><span className="capitalize text-purple-700">{order.order_status}</span></div>
+                  <div className="space-y-3">{order.order_items.map((item) => <div key={item.id} className="flex items-center gap-3"><img src={item.perfume_item?.image_url} alt="" className="h-12 w-12 rounded object-cover" /><div><p>{item.perfume_item?.name}</p><p className="text-sm text-gray-500">{item.size?.name} × {item.quantity}</p></div></div>)}</div>
+                  <p className="mt-4 border-t pt-4 text-right">Total: RM {Number(order.total_amount).toFixed(2)}</p>
+                </article>
+              ))}</div>
+            )}
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

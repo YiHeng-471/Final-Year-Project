@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\PerfumeReview;
 use App\Models\Order;
+use App\Models\PerfumeReview;
+use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
@@ -30,11 +30,6 @@ class ReviewController extends Controller
             return redirect()->back()->with('error', 'You cannot review a pending order.');
         }
 
-        // $review = new PerfumeReview();
-        // $review->order_id = $order->id;
-        // $review->rating = $request->input('rating');
-        // $review->comment = $request->input('comment');
-        // $review->save();
         PerfumeReview::create([
             'user_id' => $order->user_id,
             'order_id' => $order->id,
@@ -59,7 +54,7 @@ class ReviewController extends Controller
                 'content' => $validated['edit_review_content'],
                 'rating' => $validated['edit_review_rating'],
             ]);
-        
+
         if ($affectedRows === 0) {
             return redirect()->back()->with('error', 'Review not found or no changes made.');
         }
@@ -69,12 +64,12 @@ class ReviewController extends Controller
 
     public function delete(PerfumeReview $review)
     {
-        if (!$review) {
+        if (! $review) {
             return redirect()->back()->with('error', 'Review not found for deletion.');
         }
 
         $review->delete();
-        
+
         return redirect()->back()->with('success', 'Review deleted successfully!');
     }
 }

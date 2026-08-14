@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\QuestionnaireController;
-use App\Http\Controllers\RecommendationController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionnaireController;
+use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,23 +21,16 @@ use Inertia\Inertia;
 */
 // HomePage
 Route::get('/', function () {
-    return Inertia::render('HomePage');})->name('home'); 
+    return Inertia::render('HomePage');
+})->name('home');
 
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products');
 Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.detail');
 
 // Educational Guides
-Route::get('/guide/scent-types', fn() => Inertia::render('ScentTypesGuide'))->name('guide.scent-types');
-Route::get('/guide/fragrance-notes', fn() => Inertia::render('FragranceNotesGuide'))->name('guide.fragrance-notes');
-
-// Shopping Cart 
-Route::controller(CartController::class)->group(function () {
-    Route::get('/cart', 'index')->name('cart');
-    Route::post('/cart', 'create')->name('cart.create');
-    Route::patch('/cart/{cartItem}', 'update')->name('cart.update');
-    Route::delete('/cart/{cartItem}', 'delete')->name('cart.delete');
-});
+Route::get('/guide/scent-types', fn () => Inertia::render('ScentTypesGuide'))->name('guide.scent-types');
+Route::get('/guide/fragrance-notes', fn () => Inertia::render('FragranceNotesGuide'))->name('guide.fragrance-notes');
 
 /*
 |--------------------------------------------------------------------------
@@ -46,12 +39,12 @@ Route::controller(CartController::class)->group(function () {
 */
 Route::middleware('guest')->prefix('auth')->group(function () {
     Route::prefix('login')->group(function () {
-        Route::get('/', fn() => Inertia::render('LoginPage'))->name('login');
+        Route::get('/', fn () => Inertia::render('LoginPage'))->name('login');
         Route::post('/', [LoginController::class, 'check'])->name('login.submit');
     });
 
     Route::prefix('register')->group(function () {
-        Route::get('/', fn() => Inertia::render('RegisterPage'))->name('register');
+        Route::get('/', [RegisterController::class, 'index'])->name('register');
         Route::post('/', [RegisterController::class, 'create'])->name('register.submit');
     });
 
@@ -85,6 +78,13 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    Route::controller(CartController::class)->group(function () {
+        Route::get('/cart', 'index')->name('cart');
+        Route::post('/cart', 'create')->name('cart.create');
+        Route::patch('/cart/{cartItem}', 'update')->name('cart.update');
+        Route::delete('/cart/{cartItem}', 'delete')->name('cart.delete');
+    });
 
     // Checkout & Order Actions
     Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');

@@ -10,25 +10,21 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    public function index()
-    {
-        return view('auth.login');
-    }
-
     public function check(Request $request)
     {
         $validated = $request->validate([
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
         $user = User::where('email', $validated['email'])->first();
-        if (!$user || !Hash::check($validated['password'], $user->password)) {
+        if (! $user || ! Hash::check($validated['password'], $user->password)) {
             return back()->withErrors(['email' => 'Incorrect email or password.'])->onlyInput('email');
         }
 
-        if (!$user->email_verified_at) {
+        if (! $user->email_verified_at) {
             session(['email' => $user->email]);
+
             return redirect()->route('verification.show');
         }
 

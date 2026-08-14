@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePage, router } from '@inertiajs/react';
 import Navigation from './Navigation';
 import { CreditCard, MapPin, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
-  const { cart = [], clearCart = () => {} } = usePage().props || {};
+  const { cart = [], success = false } = usePage().props || {};
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -42,15 +42,20 @@ export default function CheckoutPage() {
     }, {
       onSuccess: () => {
         toast.success('Order placed successfully!');
-        Inertia.visit('/checkout/success');
+        router.visit('/checkout/success');
       }
     });
   };
 
-  if (!cart || cart.length === 0) {
-    Inertia.visit('/cart');
-    return null;
+  useEffect(() => {
+    if (!success && cart.length === 0) router.visit('/cart');
+  }, [cart.length, success]);
+
+  if (success) {
+    return <div className="min-h-screen bg-gray-50"><Navigation /><div className="mx-auto max-w-xl px-4 py-24 text-center"><Check className="mx-auto mb-5 h-16 w-16 text-green-600" /><h1 className="mb-3 text-3xl">Order placed successfully</h1><p className="text-gray-600">Your simulated payment and order have been recorded.</p></div></div>;
   }
+
+  if (cart.length === 0) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -318,7 +323,7 @@ export default function CheckoutPage() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-3">
                     <div className="w-16 h-16 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">{item.image}</span>
+                      {item.image_url ? <img src={item.image_url} alt={item.name} className="h-full w-full rounded-lg object-cover" /> : null}
                     </div>
                     <div className="flex-1">
                       <h4 className="text-sm mb-1">{item.name}</h4>

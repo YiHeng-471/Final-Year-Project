@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,7 +38,16 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'auth' => fn () => [
+                'user' => $request->user(),
+            ],
+            // Navigation only needs a badge count. Full cart data belongs to cart pages.
+            'cartItemCount' => fn () => $request->user()
+                ? CartItem::query()
+                    ->join('carts', 'carts.id', '=', 'cart_items.cart_id')
+                    ->where('carts.user_id', $request->user()->id)
+                    ->sum('cart_items.quantity')
+                : 0,
         ];
     }
 }

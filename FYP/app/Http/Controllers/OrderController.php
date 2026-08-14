@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
-use App\Models\Cart;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -16,64 +17,55 @@ class OrderController extends Controller
     {
         $request->validate([
             'payment_method' => 'required|string',
-            'address_id' => 'nullable|integer'
+            'address_id' => 'nullable|integer',
         ]);
 
-        $cart = Cart::with(['cartItems'])->where('user_id', Auth::id())->first();
+        $cart = Cart::with(['cartItems.perfumeItem.sizes'])
+            ->where('user_id', Auth::id())
+            ->first();
 
-        if (!$cart || $cart->cartItems->isEmpty()) {
+        if (! $cart || $cart->cartItems->isEmpty()) {
             return redirect()->back()->with('error', 'Cart is empty');
         }
 
-        $subtotal = 0;
-        foreach ($cart->cartItems as $ci) {
-            // price resolved via AppServiceProvider shared cart; approximate by qty*1 for now
-            $subtotal += 0; // will compute below via order items
-        }
+        DB::transaction(function () use ($cart, $request): void {
+            $total = $cart->cartItems->sum(function ($item): float {
+                $size = $item->perfumeItem->sizes->firstWhere('id', $item->size_id);
 
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'order_type' => 'online',
-            'order_status' => 'processing',
-            'subtotal' => 0,
-            'total_amount' => 0,
-        ]);
+                abort_unless($size, 422, 'A selected product size is no longer available.');
 
-        $total = 0;
+                return (float) $size->pivot->price * $item->quantity;
+            });
 
-        foreach ($cart->cartItems as $ci) {
-            // get current price from perfume_item_sizes pivot
-            $perfume = $ci->perfumeItem()->with('sizes')->first();
-            $matched = $perfume->sizes->firstWhere('id', $ci->size_id);
-            $price = $matched ? $matched->pivot->price : 0;
-
-            OrderItem::create([
-                'order_id' => $order->id,
-                'perfume_item_id' => $ci->perfume_item_id,
-                'size_id' => $ci->size_id,
-                'quantity' => $ci->quantity,
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'order_type' => 'online',
+                'order_status' => 'processing',
+                'subtotal' => $total,
+                'total_amount' => $total,
             ]);
 
-            $total += $price * $ci->quantity;
-        }
+            $now = now();
+            OrderItem::insert($cart->cartItems->map(fn ($item) => [
+                'order_id' => $order->id,
+                'perfume_item_id' => $item->perfume_item_id,
+                'size_id' => $item->size_id,
+                'quantity' => $item->quantity,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->all());
 
-        $order->subtotal = $total;
-        $order->total_amount = $total; // no shipping/discounts for now
-        $order->save();
+            // This remains a simulated payment until a payment gateway is integrated.
+            Payment::create([
+                'order_id' => $order->id,
+                'user_id' => Auth::id(),
+                'amount' => $order->total_amount,
+                'payment_status' => 'paid',
+                'payment_method' => $request->payment_method,
+            ]);
 
-        // create a payment stub
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'user_id' => Auth::id(),
-            'amount' => $order->total_amount,
-            'status' => 'paid',
-            'method' => $request->payment_method,
-        ]);
-
-        // clear cart
-        foreach ($cart->cartItems as $ci) {
-            $ci->delete();
-        }
+            $cart->cartItems()->delete();
+        });
 
         return redirect()->route('checkout.success')->with('success', 'Order placed successfully');
     }
@@ -85,4 +77,3 @@ class OrderController extends Controller
         ]);
     }
 }
-

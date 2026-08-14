@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\PerfumeItem;
 use App\Models\PerfumeCategory;
-use Illuminate\Support\Facades\Auth;
+use App\Models\PerfumeItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -65,7 +64,6 @@ class ProductController extends Controller
         $perfumeItems = $query->paginate(24)->withQueryString();
 
         return Inertia::render('ProductListing', [
-            'auth' => ['user' => Auth::user()],
             'perfumeItems' => $perfumeItems,
             'filters' => [
                 'search' => $validated['search'] ?? '',
@@ -79,7 +77,6 @@ class ProductController extends Controller
         $item = PerfumeItem::with(['perfumeCategory', 'sizes', 'perfumeReviews'])->findOrFail($id);
 
         return Inertia::render('ProductDetail', [
-            'auth' => ['user' => Auth::user()],
             'product' => $item,
         ]);
     }

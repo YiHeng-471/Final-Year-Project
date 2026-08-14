@@ -2,23 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Inertia\Inertia;
 use App\Models\User;
-use App\Mail\VerificationCodeMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Inertia\Inertia;
 
 class VerificationController extends Controller
 {
-    public function show(Request $request) 
+    public function show(Request $request)
     {
         $email = session('email') ?? $request->query('email');
 
-        if (!$email) {
+        if (! $email) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Please sign in or sign up to verify your account.'
+                'email' => 'Please sign in or sign up to verify your account.',
             ]);
         }
 
@@ -34,29 +32,30 @@ class VerificationController extends Controller
             'code' => 'required|digits:6',
         ]);
 
-        $cached = Cache::get('email_verification:' . $validated['email']);
-        
-        if (!$cached || (string)$cached !== (string)$validated['code']) {
+        $cached = Cache::get('email_verification:'.$validated['email']);
+
+        if (! $cached || (string) $cached !== (string) $validated['code']) {
             return redirect()->back()->withErrors([
-                'code' => 'Invalid or expired verification code.'
+                'code' => 'Invalid or expired verification code.',
             ]);
         }
 
         $user = User::where('email', $validated['email'])->first();
-        
+
         if ($user) {
             $user->email_verified_at = now();
             $user->save();
-            
+
             Auth::login($user);
-            
-            Cache::forget('email_verification:' . $validated['email']);
-            
+            $request->session()->regenerate();
+
+            Cache::forget('email_verification:'.$validated['email']);
+
             return redirect()->route('home')->with('success', 'Email verified successfully!');
         }
 
         return redirect()->back()->withErrors([
-            'email' => 'Account matching this verification session could not be found.'
+            'email' => 'Account matching this verification session could not be found.',
         ]);
     }
 
@@ -65,12 +64,12 @@ class VerificationController extends Controller
         $validated = $request->validate(['email' => 'required|email']);
 
         $user = User::where('email', $validated['email'])->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             return redirect()->back()->withErrors(['email' => 'User account not found.']);
         }
-        
-        if (!$user->sendEmailVerificationCode()) {
+
+        if (! $user->sendEmailVerificationCode()) {
             return redirect()->back()->withErrors(['email' => 'Failed to send mail. Try again.']);
         }
 

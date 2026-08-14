@@ -71,7 +71,11 @@ export default function CartPage() {
               >
                 <div className="flex gap-6">
                   <div className="w-24 h-24 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-4xl">{item.image}</span>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.name} className="h-full w-full rounded-lg object-cover" />
+                    ) : (
+                      <ShoppingBag className="h-8 w-8 text-gray-300" />
+                    )}
                   </div>
 
                   <div className="flex-1">

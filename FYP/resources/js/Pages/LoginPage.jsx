@@ -7,6 +7,7 @@ export default function LoginPage() {
   const { data, setData, post, processing, errors } = useForm({
     email: '',
     password: '',
+    remember: false,
   });
 
   const [ showPassword, setShowPassword ] = useState(false);
@@ -83,7 +84,7 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center">
-                <input type="checkbox" className="mr-2 rounded" />
+                <input type="checkbox" checked={data.remember} onChange={(event) => setData('remember', event.target.checked)} className="mr-2 rounded" />
                 <span className="text-gray-600">Remember me</span>
               </label>
               <Link href="/auth/forgot-password" className="text-purple-600 hover:text-purple-700">

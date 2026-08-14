@@ -1,15 +1,12 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { Sparkles, ShoppingCart, User, LogOut, BookOpen } from 'lucide-react';
 
-export default function Navigation({ children }) {
-    const { auth, cart = [] } = usePage().props || {};
+export default function Navigation() {
+    const { auth, cartItemCount = 0 } = usePage().props || {};
     const user = auth?.user;
 
-    const cartItemCount = (cart || []).reduce((sum, item) => sum + (item.quantity || 0), 0);
-
     const handleLogout = () => {
-      setUser(null);
-      router.visit('/login');
+      router.post('/logout');
     };
 
     return (
@@ -55,7 +52,7 @@ export default function Navigation({ children }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
+            {user && <Link
               href="/cart"
               className="relative p-2 hover:bg-gray-100 rounded-lg transition"
             >
@@ -65,9 +62,9 @@ export default function Navigation({ children }) {
                   {cartItemCount}
                 </span>
               )}
-            </Link>
+            </Link>}
 
-            <div className="relative group">
+            {user ? <div className="relative group">
               <button className="p-2 hover:bg-gray-100 rounded-lg transition">
                 <User className="w-5 h-5 text-gray-700" />
               </button>
@@ -91,7 +88,12 @@ export default function Navigation({ children }) {
                   Logout
                 </button>
               </div>
-            </div>
+            </div> : (
+              <div className="flex items-center gap-3 text-sm">
+                <Link href="/auth/login" className="text-gray-700 hover:text-purple-600">Sign in</Link>
+                <Link href="/auth/register" className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700">Register</Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
