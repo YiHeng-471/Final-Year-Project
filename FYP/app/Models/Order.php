@@ -17,7 +17,15 @@ class Order extends Model
         'order_type',
         'order_status',
         'subtotal',
-        'total_amount'
+        'shipping_amount',
+        'total_amount',
+        'shipping_name',
+        'shipping_email',
+        'shipping_phone',
+        'shipping_address',
+        'shipping_city',
+        'shipping_state',
+        'shipping_postcode',
     ];
 
     public function payment(): HasOne

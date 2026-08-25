@@ -17,10 +17,7 @@ class ProfileController extends Controller
         return Inertia::render('ProfilePage', [
             'preference' => $user->questionnairePreference,
             'orders' => $user->orders()
-                ->with([
-                    'orderItems.perfumeItem:id,name,image_url',
-                    'orderItems.size:id,name',
-                ])
+                ->with('orderItems')
                 ->latest()
                 ->paginate(10),
         ]);

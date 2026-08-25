@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionnaireController;
 use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -70,6 +71,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify/resend', [VerificationController::class, 'sendVerificationCode'])->name('verification.resend');
 });
 
+Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Authentication Required)
@@ -90,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success', [OrderController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/cancel', [OrderController::class, 'cancel'])->name('checkout.cancel');
 
     // User Data
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');

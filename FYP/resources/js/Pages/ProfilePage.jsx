@@ -53,7 +53,7 @@ export default function ProfilePage() {
               <div className="space-y-5">{orderList.map((order) => (
                 <article key={order.id} className="rounded-xl border border-gray-200 p-5">
                   <div className="mb-4 flex justify-between"><div><h3>Order #{order.id}</h3><p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString('en-MY')}</p></div><span className="capitalize text-purple-700">{order.order_status}</span></div>
-                  <div className="space-y-3">{order.order_items.map((item) => <div key={item.id} className="flex items-center gap-3"><img src={item.perfume_item?.image_url} alt="" className="h-12 w-12 rounded object-cover" /><div><p>{item.perfume_item?.name}</p><p className="text-sm text-gray-500">{item.size?.name} × {item.quantity}</p></div></div>)}</div>
+                  <div className="space-y-3">{order.order_items.map((item) => <div key={item.id} className="flex items-center justify-between gap-3"><div><p>{item.product_name}</p><p className="text-sm text-gray-500">{item.size_name} × {item.quantity}</p></div><p className="text-sm">RM {(Number(item.unit_price) * item.quantity).toFixed(2)}</p></div>)}</div>
                   <p className="mt-4 border-t pt-4 text-right">Total: RM {Number(order.total_amount).toFixed(2)}</p>
                 </article>
               ))}</div>

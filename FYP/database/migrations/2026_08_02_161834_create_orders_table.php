@@ -19,7 +19,15 @@ return new class extends Migration
             $table->string('order_type');
             $table->string('order_status');
             $table->decimal('subtotal');
+            $table->decimal('shipping_amount')->default(0);
             $table->decimal('total_amount');
+            $table->string('shipping_name');
+            $table->string('shipping_email');
+            $table->string('shipping_phone', 30);
+            $table->string('shipping_address');
+            $table->string('shipping_city');
+            $table->string('shipping_state');
+            $table->string('shipping_postcode', 10);
             $table->timestamps();
         });
     }

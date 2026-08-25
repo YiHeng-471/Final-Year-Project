@@ -21,6 +21,10 @@ return new class extends Migration
             $table->foreignId('size_id')
                 ->constrained('sizes');
             $table->integer('quantity');
+            $table->decimal('unit_price');
+            $table->string('product_name');
+            $table->string('size_name');
+            $table->unsignedBigInteger('source_cart_item_id')->nullable();
             $table->timestamps();
         });
     }

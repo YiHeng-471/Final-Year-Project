@@ -14,7 +14,11 @@ class OrderItem extends Model
         'order_id',
         'perfume_item_id',
         'size_id',
-        'quantity'
+        'quantity',
+        'unit_price',
+        'product_name',
+        'size_name',
+        'source_cart_item_id',
     ];
 
     public function order(): BelongsTo

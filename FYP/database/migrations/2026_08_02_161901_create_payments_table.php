@@ -20,6 +20,10 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('payment_status');
             $table->decimal('amount');
+            $table->string('stripe_checkout_session_id')->nullable()->unique();
+            $table->string('stripe_payment_intent_id')->nullable()->unique();
+            $table->text('failure_message')->nullable();
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
         });
     }
